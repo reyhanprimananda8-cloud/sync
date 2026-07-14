@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYNC — Subsidiary sYnergy & Control Hub</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+:root{
+  --navy:#0B1F3A; --navy2:#12294A; --navy3:#1C3A63; --teal:#009CA6; --tealD:#0B7C83; --tealL:#E6F4F5;
+  --amber:#F5A623; --amberL:#FEF4E2; --red:#E03E3E; --redL:#FCEAEA; --green:#1FA971; --greenL:#E7F5EE;
+  --paper:#F2F5F8; --line:#E2E8F0; --lineL:#F1F5F9; --mute:#6B7C93; --ink:#0B1F3A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.45;display:flex;min-height:100vh}
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ============ SIDEBAR ============ */
+aside{width:236px;flex-shrink:0;background:var(--navy);padding:20px 13px;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;gap:2px}
+.brand{display:flex;align-items:center;gap:10px;padding:2px 6px 16px}
+.brand .logo{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--teal),#00D4C8);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:15px}
+.brand b{color:#fff;font-size:18px;letter-spacing:1px;display:block}
+.brand small{color:#7E93AE;font-size:9px}
+.nav{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:9px;cursor:pointer;color:#AEBED2;font-size:13px;font-weight:500;transition:.15s;border:none;background:none;width:100%;text-align:left;font-family:inherit}
+.nav:hover{background:var(--navy2);color:#fff}
+.nav.on{background:var(--teal);color:#fff;font-weight:600}
+.nav .badge{margin-left:auto;font-size:9.5px;font-weight:700;padding:1px 7px;border-radius:20px;background:var(--navy2);color:#AEBED2}
+.nav .badge.hot{background:var(--red);color:#fff}
+.nav svg{flex-shrink:0}
+.pelindo{margin-top:auto;padding:13px;border-radius:12px;background:linear-gradient(135deg,var(--navy2),var(--navy));border:1px solid var(--navy3)}
+.pelindo .chip{background:#fff;border-radius:8px;padding:6px 10px;display:inline-block;color:var(--navy);font-weight:800;font-size:13px;letter-spacing:.5px}
+.pelindo div{color:#7E93AE;font-size:10.5px;margin-top:6px}
+
+/* ============ MAIN ============ */
+main{flex:1;padding:20px 24px 60px;max-width:1220px;margin:0 auto;width:100%;min-width:0}
+.tophead{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+h1{font-size:22px;font-weight:800;letter-spacing:-.4px}
+.sub{font-size:12.5px;color:var(--mute);margin-top:2px}
+.period{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.period .pbox{background:#fff;border:1px solid var(--line);border-radius:9px;padding:7px 11px;font-size:12px;font-weight:600;white-space:nowrap}
+.period .muted{color:var(--mute)}
+
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.card h2{font-size:12.5px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2 .lk{margin-left:auto;font-size:11.5px;font-weight:600;color:var(--teal);cursor:pointer;text-transform:none;letter-spacing:0}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:repeat(3,1fr)}.g4{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(6,1fr)}
+.gwide{grid-template-columns:1.6fr 1fr}
+@media(max-width:960px){.g3,.g4,.g6,.gwide,.g2{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.g2,.g3,.g4,.g6,.gwide{grid-template-columns:1fr}aside{display:none}}
+
+/* kpi cards */
+.kcard{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px;position:relative}
+.kcard .dot{position:absolute;top:13px;right:13px;width:8px;height:8px;border-radius:20px}
+.kcard .lab{font-size:10px;color:var(--mute);font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.kcard .unit{font-size:9.5px;color:var(--mute)}
+.kcard .val{font-size:21px;font-weight:800;letter-spacing:-.5px;margin-top:2px}
+.kcard .yoy{font-size:11.5px;font-weight:700;margin-top:2px}
+
+/* pills & chips */
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px}
+.sdot{width:8px;height:8px;border-radius:20px;display:inline-block}
+.tag{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:20px;background:#EEF2F7;color:var(--mute)}
+
+/* tables */
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;text-transform:uppercase;letter-spacing:.4px;color:var(--mute);font-weight:700;text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;font-size:12.5px;border-bottom:1px solid var(--lineL);vertical-align:middle}
+tr.click{cursor:pointer;transition:.12s}
+tr.click:hover{background:#F7FAFC}
+.tr{text-align:right}.tc{text-align:center}
+
+/* controls */
+.controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+select,input[type=text]{font-family:inherit;font-size:12.5px;font-weight:500;border:1px solid var(--line);border-radius:9px;padding:8px 11px;background:#fff;color:var(--ink)}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--mute);padding:8px 12px;cursor:pointer;border-right:1px solid var(--line)}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--teal);color:#fff}
+.btn{border:none;border-radius:9px;padding:9px 14px;font-family:inherit;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px}
+.btn.navy{background:var(--navy);color:#fff}.btn.navy:hover{background:var(--navy2)}
+.btn.ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn.done{background:var(--greenL);color:var(--green);cursor:default}
+.btn.sm{padding:5px 10px;font-size:11px}
+.spacer{flex:1}
+
+/* bars */
+.barbg{height:8px;background:#EEF2F7;border-radius:20px;overflow:hidden}
+.barbg>div{height:100%;border-radius:20px;transition:width .4s}
+
+/* drawer */
+.overlay{position:fixed;inset:0;background:rgba(11,31,58,.4);opacity:0;pointer-events:none;transition:.2s;z-index:8}
+.overlay.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;right:0;height:100vh;width:430px;max-width:94vw;background:#fff;box-shadow:-10px 0 40px rgba(11,31,58,.18);transform:translateX(100%);transition:.25s cubic-bezier(.4,0,.2,1);z-index:9;overflow-y:auto;padding:22px}
+.drawer.on{transform:translateX(0)}
+.drawer .x{position:absolute;top:16px;right:16px;background:none;border:none;font-size:24px;color:var(--mute);cursor:pointer;line-height:1}
+.flash{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:12px 18px;border-radius:11px;font-size:13px;font-weight:500;box-shadow:0 8px 30px rgba(11,31,58,.3);transition:.3s;z-index:20;max-width:90vw}
+.flash.on{transform:translateX(-50%) translateY(0)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade{animation:fadeUp .25s ease}
+.note{font-size:11px;color:var(--mute);font-style:italic;text-align:center;margin-top:6px}
+.srcnote{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:600;background:#EEF2F7;color:var(--mute);padding:4px 10px;border-radius:7px}
+.empty{padding:28px;text-align:center;color:var(--mute);font-size:13px}
+</style>
+</head>
+<body>
+
+<aside>
+  <div class="brand">
+    <div class="logo">S</div>
+    <div><b>SYNC</b><small>Subsidiary sYnergy &amp; Control Hub</small></div>
+  </div>
+  <div id="navwrap"></div>
+  <div class="pelindo"><span class="chip">PELINDO</span><div>Integrated Performance</div></div>
+</aside>
+
+<main>
+  <div class="tophead">
+    <div><h1 id="pgTitle"></h1><div class="sub" id="pgSub"></div></div>
+    <div class="period">
+      <span class="pbox">📅 Q2 2025 (Apr–Jun)</span><span style="font-size:12px;color:var(--mute)">vs</span>
+      <span class="pbox muted">Q2 2024</span>
+    </div>
+  </div>
+  <div id="view"></div>
+</main>
+
+<div class="overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+<div class="flash" id="flash"></div>
+
+<script>
+/* ================================================================
+   SYNC — Subsidiary sYnergy & Control Hub
+   Single-file app. Struktur data mengikuti arsitektur dua jenis:
+
+   JENIS 1 (READ-ONLY) — data kinerja dari sistem direktorat.
+   Di produksi: di-fetch via API dari Sistem Keuangan (ERP),
+   Operasional (TOS), dan Komersial. Di prototipe: dummy di bawah.
+   SYNC TIDAK menyimpan ulang data ini.
+
+   JENIS 2 (READ-WRITE) — data yang LAHIR di SYNC:
+   action items, keputusan exception, status/aksi korporasi.
+   Disimpan permanen (localStorage; nanti diganti Supabase).
+   ================================================================ */
+
+const C = {navy:'#0B1F3A',teal:'#009CA6',tealD:'#0B7C83',amber:'#F5A623',red:'#E03E3E',green:'#1FA971',mute:'#6B7C93',line:'#E2E8F0'};
+const ST = {
+  ontrack:{label:'On Track',c:C.green,bg:'#E7F5EE'},
+  atrisk:{label:'At Risk',c:C.amber,bg:'#FEF4E2'},
+  offtrack:{label:'Off Track',c:C.red,bg:'#FCEAEA'},
+};
+
+/* ============ JENIS 1 — simulasi respons API sistem direktorat ============ */
+const GROUP_KPI = [
+  {k:'Revenue',u:'IDR Bn',v:'24.580',yoy:8.6,up:1,s:'ontrack'},
+  {k:'EBITDA',u:'IDR Bn',v:'7.258',yoy:10.3,up:1,s:'ontrack'},
+  {k:'Net Profit',u:'IDR Bn',v:'1.050',yoy:7.0,up:1,s:'ontrack'},
+  {k:'Operating Margin',u:'%',v:'20,6',yoy:1.6,up:1,s:'atrisk'},
+  {k:'ROIC',u:'%',v:'12,8',yoy:1.2,up:1,s:'ontrack'},
+  {k:'Exception Alerts',u:'Total',v:'18',yoy:6,up:0,s:'offtrack',alert:1},
+];
+const TREND = [
+  {m:'Jan',rev:19800,mg:28},{m:'Feb',rev:20400,mg:29},{m:'Mar',rev:21100,mg:28.5},
+  {m:'Apr',rev:22600,mg:30},{m:'May',rev:23400,mg:30.4},{m:'Jun',rev:24580,mg:31},
+];
+/* per-entitas: revenue Q2'25, Q2'24, target, dan status per perspektif */
+const ENTITIES = [
+  {id:'PTP', nama:'PT Pelindo Terminal Petikemas', rev:4850, prev:4442, tgt:4700, fin:'ontrack', ops:'offtrack', com:'ontrack'},
+  {id:'PMT', nama:'PT Pelindo Multi Terminal',     rev:4620, prev:4354, tgt:4500, fin:'atrisk',  ops:'ontrack',  com:'ontrack'},
+  {id:'PJM', nama:'PT Pelindo Jasa Maritim',       rev:4150, prev:4545, tgt:4545, fin:'offtrack',ops:'offtrack', com:'offtrack'},
+  {id:'PSL', nama:'PT Pelindo Sinergi Lokaseva',   rev:3280, prev:3145, tgt:3400, fin:'atrisk',  ops:'ontrack',  com:'atrisk'},
+  {id:'JICT',nama:'PT Jakarta Int. Container Terminal', rev:2890, prev:2681, tgt:2800, fin:'ontrack', ops:'ontrack', com:'ontrack'},
+  {id:'PHC', nama:'PT Pelindo Husada Citra',       rev:1950, prev:1996, tgt:2050, fin:'atrisk',  ops:'atrisk',   com:'ontrack'},
+];
+/* variance bridge revenue grup (IDR Bn) */
+const BRIDGE = [
+  {f:'Target Q2',v:26800,type:'anchor'},
+  {f:'Δ Volume',v:-900,type:'delta'},
+  {f:'Δ Tarif',v:-820,type:'delta'},
+  {f:'Δ Mix layanan',v:-500,type:'delta'},
+  {f:'Δ Lainnya',v:0,type:'delta'},
+  {f:'Aktual Q2',v:24580,type:'anchor'},
+];
+/* variance per entitas terhadap target */
+const EXCEPTIONS = [
+  {id:'EX-104',t:'Pendapatan di bawah target',e:'PJM',metric:'-8,7% vs target',impact:'High',s:'offtrack',
+   threshold:'Deviasi revenue > 5% dari target',
+   root:'Throughput petikemas turun 11,3%; tarif rata-rata melemah. Terkonsentrasi di layanan Pemanduan Regional 2.',
+   rec:'Optimalkan kapasitas alat & perkuat strategi harga; rotasi pandu dari Regional 4; buka Deep Dive untuk rincian.'},
+  {id:'EX-098',t:'Biaya operasi di atas target',e:'PMT',metric:'+6,5% vs target',impact:'Medium',s:'atrisk',
+   threshold:'Biaya operasi > 3% di atas target',
+   root:'Kenaikan biaya energi & lembur pada shift bongkar muat puncak.',
+   rec:'Review jadwal shift; negosiasi ulang kontrak energi via kontrak payung.'},
+  {id:'EX-091',t:'Container throughput menurun',e:'PTP',metric:'-11,3% MoM',impact:'High',s:'offtrack',
+   threshold:'Penurunan throughput > 8% MoM',
+   root:'Kongesti yard: dwelling time naik di dua terminal utama, yard occupancy 78% (batas 70%).',
+   rec:'Aktifkan yard overflow plan; percepat clearance dokumen; benchmark pola Regional 4.'},
+  {id:'EX-087',t:'Receivable days memburuk',e:'PSL',metric:'+18 hari vs PY',impact:'Medium',s:'atrisk',
+   threshold:'Collection period > 45 hari',
+   root:'Konsentrasi piutang pada 3 pelanggan korporat besar; termin longgar.',
+   rec:'Perketat termin; aktifkan program collection terjadwal.'},
+];
+/* struktur anak perusahaan (metadata; status & aksi = Jenis 2) */
+const SUBS_TREE = [
+  {id:'PTP',nama:'PT Pelindo Terminal Petikemas',anak:8},
+  {id:'PMT',nama:'PT Pelindo Multi Terminal',anak:3},
+  {id:'PJM',nama:'PT Pelindo Jasa Maritim',anak:10},
+  {id:'PSL',nama:'PT Pelindo Sinergi Lokaseva',anak:7},
+  {id:'JICT',nama:'PT Jakarta International Container Terminal',anak:0},
+  {id:'KOJA',nama:'KSO Terminal Petikemas Koja',anak:0},
+  {id:'PMLI',nama:'PT Pendidikan Maritim dan Logistik Indonesia',anak:1},
+  {id:'ILCS',nama:'PT Integrasi Logistik Cipta Solusi',anak:0},
+  {id:'EDII',nama:'PT Electronic Data Interchange Indonesia',anak:0},
+  {id:'PHC',nama:'PT Pelindo Husada Citra',anak:0},
+];
+/* deep dive: dekomposisi EX-104 */
+const DD = {
+  svc:[{n:'Pemanduan',dev:-62,abs:'-1.376 Bn'},{n:'Penundaan',dev:-21,abs:'-466 Bn'},{n:'Tambat',dev:-11,abs:'-244 Bn'},{n:'Lainnya',dev:-6,abs:'-133 Bn'}],
+  reg:[{n:'Regional 2',dev:-14.2},{n:'Regional 1',dev:-3.0},{n:'Regional 3',dev:-2.1},{n:'Regional 4',dev:1.0}],
+  findings:[
+    {t:'Kekurangan personel pandu (8 posisi kosong)',d:5,u:5,ef:3,pic:'SDM PJM + Ops Reg. 2',hor:'Struktural'},
+    {t:'3 unit motor pandu rusak menunggu suku cadang',d:4,u:4,ef:2,pic:'Teknik PJM Reg. 2',hor:'Quick win'},
+    {t:'Penjadwalan pandu masih manual',d:3,u:3,ef:4,pic:'IT PJM + Ops',hor:'Struktural'},
+    {t:'Koordinasi jendela pasang-surut belum optimal',d:2,u:3,ef:2,pic:'Ops Reg. 2',hor:'Quick win'},
+  ],
+};
+
+/* ============ JENIS 2 — data milik SYNC (persisted) ============ */
+const DEFAULT_STATE = {
+  actions:[
+    {id:'ACT-051',t:'Susun yard overflow plan PTP',from:'EX-091',e:'PTP',pic:'Ops Dir. — Reza',due:'2025-07-18',st:'progress'},
+    {id:'ACT-050',t:'Negosiasi ulang kontrak energi PMT',from:'EX-098',e:'PMT',pic:'Proc. — Andini',due:'2025-07-22',st:'open'},
+    {id:'ACT-047',t:'Program collection piutang PSL',from:'EX-087',e:'PSL',pic:'Fin. — Bimo',due:'2025-07-15',st:'open'},
+    {id:'ACT-042',t:'Review strategi tarif PJM',from:'EX-104',e:'PJM',pic:'Comm. — Sari',due:'2025-07-10',st:'done'},
+  ],
+  exDecisions:{},           /* {EX-104:{status:'assigned'|'reviewed'|'dismissed', note}} */
+  subsStatus:{},            /* {PTP:{status:'Active', aksi:'...'}} */
+  seq:52,
+};
+const TODAY = '2025-07-15'; /* tanggal "hari ini" untuk demo — samakan dengan Last Updated */
+
+const store = (()=>{
+  const KEY='sync_app_v1';
+  let mem=null;
+  function load(){
+    if(mem) return mem;
+    try{ const raw=localStorage.getItem(KEY); mem = raw? JSON.parse(raw) : structuredClone(DEFAULT_STATE); }
+    catch(e){ mem = structuredClone(DEFAULT_STATE); }
+    return mem;
+  }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(mem)); }catch(e){} }
+  function reset(){ mem=structuredClone(DEFAULT_STATE); save(); }
+  return {get:load, save, reset};
+})();
+const S = () => store.get();
+
+/* ============ helpers ============ */
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n).toLocaleString('id-ID');
+const pct = (a,b) => b? Math.round(a/b*100) : 0;
+function pill(s){const m=ST[s];return `<span class="pill" style="background:${m.bg};color:${m.c}"><span class="sdot" style="background:${m.c}"></span>${m.label}</span>`;}
+function sdot(s){return `<span class="sdot" style="background:${ST[s].c}" title="${ST[s].label}"></span>`;}
+function flash(msg){const f=$('flash');f.textContent=msg;f.classList.add('on');clearTimeout(f._t);f._t=setTimeout(()=>f.classList.remove('on'),3600);}
+function spark(data,color,w=64,h=22){
+  const max=Math.max(...data),min=Math.min(...data),r=(max-min)||1;
+  const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v-min)/r)*(h-3)-1.5}`).join(' ');
+  return `<svg width="${w}" height="${h}"><polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2"/></svg>`;
+}
+function isOverdue(a){ return a.st!=='done' && a.due && a.due < TODAY; }
+function actionStatusChip(a){
+  if(a.st==='done') return `<span class="pill" style="background:${ST.ontrack.bg};color:${C.green}">Completed</span>`;
+  if(isOverdue(a)) return `<span class="pill" style="background:${ST.offtrack.bg};color:${C.red}">Overdue</span>`;
+  if(a.st==='progress') return `<span class="pill" style="background:#E6F4F5;color:${C.tealD}">In Progress</span>`;
+  return `<span class="pill" style="background:#EEF2F7;color:${C.mute}">Open</span>`;
+}
+function exStatus(id){ const d=S().exDecisions[id]; return d? d.status : 'new'; }
+const EXST = {new:['Baru','#EEF2F7',C.mute], reviewed:['Ditinjau','#E6F4F5',C.tealD], assigned:['Jadi Action','#E7F5EE',C.green], dismissed:['Diabaikan','#FCEAEA',C.red]};
+function exChip(id){const [l,bg,fg]=EXST[exStatus(id)];return `<span class="pill" style="background:${bg};color:${fg}">${l}</span>`;}
+
+/* ============ NAV & ROUTER ============ */
+const PAGES = [
+  {id:'dashboard',label:'Dashboard',sub:'Executive BPR Dashboard · ringkasan kinerja grup'},
+  {id:'overview',label:'Performance Overview',sub:'Helicopter view kesehatan grup & tiap entitas'},
+  {id:'kpi',label:'KPI Monitoring',sub:'Status & pencapaian target tiap KPI'},
+  {id:'variance',label:'Variance & Insight',sub:'Dari mana gap terhadap target berasal'},
+  {id:'subs',label:'Subsidiaries',sub:'Struktur anak perusahaan, status & aksi korporasi'},
+  {id:'exception',label:'Exception Center',sub:'Isu di atas threshold — tinjau, tugaskan, atau abaikan'},
+  {id:'deepdive',label:'Deep Dive',sub:'Bedah akar masalah sampai wilayah & prioritas'},
+  {id:'action',label:'Action Tracker',sub:'Eksekusi keputusan — closed loop sampai tuntas'},
+  {id:'loop',label:'Improvement Loop',sub:'Data → Insight → Action → Outcome → Feedback'},
+  {id:'reports',label:'Reports',sub:'Laporan otomatis siap unduh'},
+  {id:'data',label:'Data Management',sub:'Status integrasi sumber & data aplikasi'},
+  {id:'admin',label:'Administration',sub:'Role, akses & decision rights'},
+];
+const ICONS = {dashboard:'▦',overview:'📊',kpi:'〰',variance:'⇄',subs:'🏢',exception:'⚠',deepdive:'🔎',action:'☑',loop:'↻',reports:'📄',data:'🗄',admin:'⚙'};
+let current='dashboard';
+
+function renderNav(){
+  const exNew = EXCEPTIONS.filter(x=>exStatus(x.id)==='new').length;
+  const actOpen = S().actions.filter(a=>a.st!=='done').length;
+  $('navwrap').innerHTML = PAGES.map(p=>{
+    let badge='';
+    if(p.id==='exception'&&exNew) badge=`<span class="badge hot">${exNew}</span>`;
+    if(p.id==='action'&&actOpen) badge=`<span class="badge">${actOpen}</span>`;
+    return `<button class="nav ${current===p.id?'on':''}" onclick="go('${p.id}')"><span style="width:16px;text-align:center">${ICONS[p.id]}</span>${p.label}${badge}</button>`;
+  }).join('');
+}
+function go(id){ current=id; closeDrawer(); render(); window.scrollTo({top:0}); }
+function render(){
+  const p=PAGES.find(x=>x.id===current);
+  $('pgTitle').textContent=p.label==='Dashboard'?'Executive BPR Dashboard':p.label;
+  $('pgSub').textContent=p.sub;
+  renderNav();
+  $('view').innerHTML = R[current]();
+  $('view').classList.remove('fade'); void $('view').offsetWidth; $('view').classList.add('fade');
+}
+
+/* ============ PAGE RENDERERS ============ */
+const R = {};
+
+/* ---------- DASHBOARD ---------- */
+R.dashboard = () => {
+  const kcards = GROUP_KPI.map(k=>`
+    <div class="kcard"><span class="dot" style="background:${ST[k.s].c}"></span>
+      <div class="lab">${k.k}</div><div class="unit mono">${k.u}</div>
+      <div class="val" style="${k.alert?'color:'+C.red:''}">${k.v}</div>
+      <div class="yoy" style="color:${k.up?C.green:C.red}">${k.up?'▲':'▼'} ${k.alert?'+'+k.yoy+' vs Q2 24':(k.yoy>0?'+':'')+k.yoy+'% YoY'}</div>
+      ${spark(k.alert?[10,12,11,14,16,18]:[1,1.05,1.02,1.1,1.12,1.18], k.up?C.teal:C.red)}
+    </div>`).join('');
+  const exTop = EXCEPTIONS.map(x=>`
+    <tr class="click" onclick="go('exception');setTimeout(()=>openEx('${x.id}'),80)">
+      <td>${sdot(x.s)} <b style="font-size:12.5px">${x.t}</b><div style="font-size:11px;color:var(--mute)">${x.e} · <span class="mono">${x.metric}</span></div></td>
+      <td class="tr"><span class="pill" style="background:${x.impact==='High'?ST.offtrack.bg:ST.atrisk.bg};color:${x.impact==='High'?C.red:'#B37413'}">${x.impact}</span></td>
+    </tr>`).join('');
+  const acts=S().actions; const done=acts.filter(a=>a.st==='done').length;
+  return `
+  <div class="grid g6">${kcards}</div>
+  <div class="grid" style="grid-template-columns:1.5fr 1fr;margin-top:14px">
+    <div class="card" style="margin:0"><h2>Trend Over Time <span class="lk" onclick="go('overview')">Performance Overview ›</span></h2>${trendChart(520,180)}</div>
+    <div class="card" style="margin:0"><h2>Top Exception Alerts <span class="lk" onclick="go('exception')">View All ›</span></h2><table>${exTop}</table></div>
+  </div>
+  <div class="grid g3" style="margin-top:14px">
+    <div class="card" style="margin:0"><h2>Action Summary <span class="lk" onclick="go('action')">Tracker ›</span></h2>
+      <div style="display:flex;justify-content:space-around;text-align:center">
+        ${[['Total',acts.length,C.navy],['Selesai',done,C.green],['Overdue',acts.filter(isOverdue).length,C.red]].map(x=>`<div><div style="font-size:26px;font-weight:800;color:${x[2]}">${x[1]}</div><div style="font-size:11px;color:var(--mute)">${x[0]}</div></div>`).join('')}
+      </div></div>
+    <div class="card" style="margin:0"><h2>Next BPR Meeting</h2>
+      <div style="display:flex;gap:12px;align-items:center"><div style="width:42px;height:42px;border-radius:11px;background:var(--tealL);display:flex;align-items:center;justify-content:center;font-size:20px">📅</div>
+      <div><b style="font-size:14px">24 Jul 2025 · 09.00 WIB</b><div style="font-size:12px;color:var(--mute)">Executive BPR Q2 2025 — agenda otomatis dari exception</div></div></div></div>
+    <div class="card" style="margin:0;background:linear-gradient(160deg,var(--teal),var(--tealD));border:none"><div style="color:#fff;font-size:15px;font-weight:700;font-style:italic;line-height:1.45;padding:6px 2px">“From Data to Decision.<br>From Insight to Impact.”</div></div>
+  </div>`;
+};
+
+function trendChart(w,h){
+  const max=26000,pad=28;
+  const bw=(w-pad)/TREND.length*0.5;
+  let bars='',line='',pts=[];
+  TREND.forEach((t,i)=>{
+    const x=pad+i*((w-pad)/TREND.length)+((w-pad)/TREND.length-bw)/2;
+    const bh=(t.rev/max)*(h-30);
+    bars+=`<rect x="${x}" y="${h-20-bh}" width="${bw}" height="${bh}" rx="5" fill="${C.teal}"/>`;
+    bars+=`<text x="${x+bw/2}" y="${h-6}" font-size="10" fill="${C.mute}" text-anchor="middle">${t.m}</text>`;
+    pts.push([x+bw/2,h-20-(t.mg/35)*(h-30)]);
+  });
+  line=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${C.amber}" stroke-width="2.5"/>`+pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${C.amber}"/>`).join('');
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto">${bars}${line}</svg>
+  <div style="display:flex;gap:14px;font-size:11px;color:var(--mute)"><span><span class="sdot" style="background:${C.teal}"></span> Revenue (IDR Bn)</span><span><span class="sdot" style="background:${C.amber}"></span> EBITDA Margin (%)</span></div>`;
+}
+
+/* ---------- PERFORMANCE OVERVIEW (dikembangkan) ---------- */
+R.overview = () => {
+  const onTrack = ENTITIES.filter(e=>[e.fin,e.ops,e.com].every(s=>s==='ontrack')).length;
+  /* momentum: naik/turun terbesar YoY */
+  const withYoY = ENTITIES.map(e=>({...e, yoy:+((e.rev-e.prev)/e.prev*100).toFixed(1), ach:pct(e.rev,e.tgt)}));
+  const best=[...withYoY].sort((a,b)=>b.yoy-a.yoy)[0], worst=[...withYoY].sort((a,b)=>a.yoy-b.yoy)[0];
+  const matrix = withYoY.map(e=>`
+    <tr class="click" onclick="go('subs')">
+      <td><b>${e.id}</b><div style="font-size:10.5px;color:var(--mute);max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.nama}</div></td>
+      <td class="tr mono" style="font-weight:700">${fmt(e.rev)}</td>
+      <td class="tr" style="font-weight:700;color:${e.yoy>=0?C.green:C.red}">${e.yoy>0?'+':''}${e.yoy}%</td>
+      <td class="tr"><span style="font-weight:800;color:${e.ach>=100?C.green:e.ach>=95?C.amber:C.red}">${e.ach}%</span></td>
+      <td class="tc">${sdot(e.fin)}</td><td class="tc">${sdot(e.ops)}</td><td class="tc">${sdot(e.com)}</td>
+    </tr>`).join('');
+  const persp = [
+    {n:'Financial',key:'fin'},{n:'Operational',key:'ops'},{n:'Commercial',key:'com'}
+  ].map(p=>{
+    const on=ENTITIES.filter(e=>e[p.key]==='ontrack').length, off=ENTITIES.filter(e=>e[p.key]==='offtrack').length;
+    const risk=ENTITIES.length-on-off;
+    return `<div class="card" style="margin:0"><h2>${p.n}</h2>
+      <div class="barbg" style="height:12px;display:flex;overflow:hidden">
+        <div style="width:${on/ENTITIES.length*100}%;background:${C.green};border-radius:0"></div>
+        <div style="width:${risk/ENTITIES.length*100}%;background:${C.amber};border-radius:0"></div>
+        <div style="width:${off/ENTITIES.length*100}%;background:${C.red};border-radius:0"></div></div>
+      <div style="display:flex;gap:12px;font-size:11px;color:var(--mute);margin-top:8px">
+        <span>${on} on track</span><span>${risk} at risk</span><span>${off} off track</span></div></div>`;
+  }).join('');
+  return `
+  <div class="grid g4">
+    ${[['Total Revenue Grup','24.580','IDR Bn','+8,6%',1],['Rata-rata EBITDA Margin','29,5','%','+1,1 pp',1],
+       ['Entitas Sepenuhnya On Track', onTrack+' / '+ENTITIES.length,'entitas',Math.round(onTrack/ENTITIES.length*100)+'%',1],
+       ['Total Exception Aktif','18','isu','+6',0]].map(x=>`
+    <div class="kcard"><div class="lab">${x[0]}</div><div class="val">${x[1]} <span style="font-size:11px;color:var(--mute);font-weight:500">${x[2]}</span></div>
+    <div class="yoy" style="color:${x[4]?C.green:C.red}">${x[3]}</div></div>`).join('')}
+  </div>
+  <div class="grid g3" style="margin-top:14px">${persp}</div>
+  <div class="grid gwide" style="margin-top:14px">
+    <div class="card" style="margin:0">
+      <h2>Matriks Kinerja Entitas <span class="lk" onclick="go('kpi')">KPI Monitoring ›</span></h2>
+      <table><tr><th>Entitas</th><th class="tr">Rev (Bn)</th><th class="tr">YoY</th><th class="tr">% Target</th><th class="tc">Fin</th><th class="tc">Ops</th><th class="tc">Com</th></tr>${matrix}</table>
+      <div style="margin-top:10px"><span class="srcnote">🗄️ Sumber: Sistem Keuangan/Operasional/Komersial (simulasi) · baca-saja</span></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div class="card" style="margin:0;border-left:4px solid ${C.green}"><h2>Momentum Terbaik</h2>
+        <b style="font-size:15px">${best.id} — ${best.nama.replace('PT Pelindo ','').replace('PT ','')}</b>
+        <div style="font-size:22px;font-weight:800;color:${C.green};margin:4px 0">+${best.yoy}% YoY</div>
+        <div style="font-size:12px;color:var(--mute)">Pencapaian target ${best.ach}%. Praktiknya layak dijadikan benchmark internal grup.</div></div>
+      <div class="card" style="margin:0;border-left:4px solid ${C.red}"><h2>Perlu Perhatian</h2>
+        <b style="font-size:15px">${worst.id} — ${worst.nama.replace('PT Pelindo ','')}</b>
+        <div style="font-size:22px;font-weight:800;color:${C.red};margin:4px 0">${worst.yoy}% YoY</div>
+        <div style="font-size:12px;color:var(--mute)">Pencapaian target ${worst.ach}%. Sudah terdeteksi sebagai exception — <span class="lk" style="font-size:12px" onclick="go('exception')">lihat EX-104 ›</span></div></div>
+      <div class="card" style="margin:0"><h2>Tren Grup — 6 Bulan</h2>${trendChart(380,150)}</div>
+    </div>
+  </div>`;
+};
+
+/* ---------- KPI MONITORING ---------- */
+const KPIS=[
+ {n:'Revenue',u:'IDR Bn',p:'Financial',o:'Grup',a:24580,pr:22645,t:26800,s:'atrisk'},
+ {n:'EBITDA',u:'IDR Bn',p:'Financial',o:'Grup',a:7258,pr:6579,t:7100,s:'ontrack'},
+ {n:'Operating Margin',u:'%',p:'Financial',o:'Grup',a:20.6,pr:19.0,t:21.5,s:'atrisk'},
+ {n:'Cost per Ton',u:'IDR K',p:'Financial',o:'Grup',a:312,pr:326,t:300,s:'offtrack',low:1},
+ {n:'Container Throughput',u:'Jt TEUs',p:'Operational',o:'PTP',a:1.06,pr:1.20,t:1.20,s:'offtrack'},
+ {n:'Vessel Turnaround',u:'jam',p:'Operational',o:'PMT',a:22,pr:25,t:24,s:'ontrack',low:1},
+ {n:'Yard Occupancy',u:'%',p:'Operational',o:'PTP',a:78,pr:71,t:70,s:'atrisk',low:1},
+ {n:'Dwelling Time',u:'hari',p:'Operational',o:'PTP',a:3.4,pr:3.0,t:2.9,s:'offtrack',low:1},
+ {n:'Average Tariff',u:'IDR K',p:'Commercial',o:'PJM',a:118,pr:128,t:130,s:'offtrack'},
+ {n:'Revenue per Call',u:'IDR Bn',p:'Commercial',o:'PJM',a:1.1,pr:1.4,t:1.4,s:'offtrack'},
+ {n:'Collection Period',u:'hari',p:'Commercial',o:'PSL',a:63,pr:45,t:45,s:'atrisk',low:1},
+ {n:'Customer Retention',u:'%',p:'Commercial',o:'Grup',a:91,pr:89,t:90,s:'ontrack'},
+];
+let kpiFilter={p:'all',s:'all'};
+R.kpi = () => {
+  const rows=KPIS.filter(k=>(kpiFilter.p==='all'||k.p===kpiFilter.p)&&(kpiFilter.s==='all'||k.s===kpiFilter.s));
+  const cnt = s=>KPIS.filter(k=>k.s===s).length;
+  return `
+  <div class="grid g4">
+    ${[['Total KPI',KPIS.length,C.navy],['On Track',cnt('ontrack'),C.green],['At Risk',cnt('atrisk'),C.amber],['Off Track',cnt('offtrack'),C.red]].map(x=>`
+    <div class="kcard" style="border-left:4px solid ${x[2]}"><div style="font-size:26px;font-weight:800;color:${x[2]}">${x[1]}</div><div style="font-size:11.5px;color:var(--mute)">${x[0]}</div></div>`).join('')}
+  </div>
+  <div class="controls" style="margin-top:14px">
+    <div class="seg">${['all','Financial','Operational','Commercial'].map(p=>`<button class="${kpiFilter.p===p?'on':''}" onclick="kpiFilter.p='${p}';render()">${p==='all'?'Semua':p}</button>`).join('')}</div>
+    <select onchange="kpiFilter.s=this.value;render()">
+      <option value="all">Semua status</option><option value="ontrack" ${kpiFilter.s==='ontrack'?'selected':''}>On Track</option>
+      <option value="atrisk" ${kpiFilter.s==='atrisk'?'selected':''}>At Risk</option><option value="offtrack" ${kpiFilter.s==='offtrack'?'selected':''}>Off Track</option>
+    </select><span class="spacer"></span><span style="font-size:12px;color:var(--mute)">${rows.length} KPI</span>
+  </div>
+  <div class="card">
+    <table><tr><th>KPI</th><th class="tr">Aktual</th><th class="tr">Q2 24</th><th class="tr">Target</th><th class="tr">% Target</th><th>Status</th></tr>
+    ${rows.map(k=>{
+      const ach=Math.round((k.low? k.t/k.a : k.a/k.t)*100);
+      const col=ach>=100?C.green:ach>=95?C.amber:C.red;
+      return `<tr><td><b>${k.n}</b><div style="font-size:10.5px;color:var(--mute)">${k.u} · ${k.p} · ${k.o}</div></td>
+      <td class="tr mono" style="font-weight:700">${fmt(k.a)}</td><td class="tr mono" style="color:var(--mute)">${fmt(k.pr)}</td>
+      <td class="tr mono" style="color:var(--mute)">${fmt(k.t)}</td><td class="tr" style="font-weight:800;color:${col}">${ach}%</td><td>${pill(k.s)}</td></tr>`;
+    }).join('')}</table>
+    <div style="margin-top:10px"><span class="srcnote">🗄️ Angka baca-saja — ditarik dari sistem sumber tiap direktorat (simulasi)</span></div>
+  </div>`;
+};
+
+/* ---------- VARIANCE & INSIGHT (dikembangkan) ---------- */
+R.variance = () => {
+  /* waterfall */
+  const max=27500, W=680, H=230, n=BRIDGE.length, bw=W/n*0.56;
+  let run=0, svg='';
+  BRIDGE.forEach((b,i)=>{
+    const x=i*(W/n)+(W/n-bw)/2;
+    let y0,y1,col;
+    if(b.type==='anchor'){ y0=0; y1=b.v; col=i===0?C.navy:C.teal; run=b.v; }
+    else { y0=run+Math.min(0,b.v); y1=run+Math.max(0,b.v); col=b.v<0?C.red:C.green; run+=b.v; if(b.v===0){y0=run-40;y1=run+40;col='#CBD5E1';} }
+    const py=v=>H-24-(v/max)*(H-40);
+    svg+=`<rect x="${x}" y="${py(Math.max(y0,y1))}" width="${bw}" height="${Math.max(3,Math.abs(py(y0)-py(y1)))}" rx="4" fill="${col}" opacity="${b.v===0&&b.type!=='anchor'?0.35:1}"/>`;
+    svg+=`<text x="${x+bw/2}" y="${H-8}" font-size="9.5" fill="${C.mute}" text-anchor="middle">${b.f}</text>`;
+    const lblv = b.type==='anchor'? fmt(b.v) : (b.v>0?'+':'')+fmt(b.v);
+    svg+=`<text x="${x+bw/2}" y="${py(Math.max(y0,y1))-5}" font-size="10" font-weight="700" fill="${col==='#CBD5E1'?C.mute:col}" text-anchor="middle" font-family="JetBrains Mono">${lblv}</text>`;
+    if(b.type!=='anchor'&&i<n-1){ const nx=(i+1)*(W/n)+(W/n-bw)/2; svg+=`<line x1="${x+bw}" y1="${py(run)}" x2="${nx}" y2="${py(run)}" stroke="${C.line}" stroke-dasharray="3 3"/>`; }
+  });
+  /* per-entity variance */
+  const evar = ENTITIES.map(e=>({...e, gap:e.rev-e.tgt})).sort((a,b)=>a.gap-b.gap);
+  const totGap = evar.reduce((s,e)=>s+Math.min(0,e.gap),0);
+  const evRows = evar.map(e=>{
+    const contrib = e.gap<0? Math.round(e.gap/totGap*100):0;
+    return `<tr><td><b>${e.id}</b></td>
+      <td class="tr mono" style="color:var(--mute)">${fmt(e.tgt)}</td>
+      <td class="tr mono" style="font-weight:700">${fmt(e.rev)}</td>
+      <td class="tr mono" style="font-weight:800;color:${e.gap>=0?C.green:C.red}">${e.gap>0?'+':''}${fmt(e.gap)}</td>
+      <td style="min-width:110px">${e.gap<0?`<div class="barbg"><div style="width:${contrib}%;background:${C.red}"></div></div>`:'<span style="font-size:11px;color:'+C.green+';font-weight:700">di atas target ✓</span>'}</td>
+      <td class="tr" style="font-size:11.5px;color:var(--mute)">${e.gap<0? contrib+'% dari gap':'—'}</td></tr>`;
+  }).join('');
+  return `
+  <div class="card"><h2>Variance Bridge — Revenue Grup Q2 (IDR Bn)</h2>
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${svg}</svg>
+    <div style="font-size:12px;color:var(--mute)">Gap total <b class="mono" style="color:${C.red}">-2.220 Bn</b> terhadap target — 78% berasal dari penurunan volume &amp; tarif.</div>
+  </div>
+  <div class="grid gwide">
+    <div class="card" style="margin:0"><h2>Kontribusi Gap per Entitas</h2>
+      <table><tr><th>Entitas</th><th class="tr">Target</th><th class="tr">Aktual</th><th class="tr">Gap</th><th>Kontribusi ke gap</th><th class="tr"></th></tr>${evRows}</table>
+      <div style="margin-top:10px"><span class="srcnote">🗄️ Sumber: Sistem Keuangan (simulasi) · baca-saja</span></div>
+    </div>
+    <div class="card" style="margin:0;background:linear-gradient(160deg,var(--navy),var(--navy2));border-color:var(--navy3)">
+      <h2 style="color:#fff">✦ Narasi Otomatis <span class="mono" style="margin-left:auto;font-size:9px;color:#7E93AE;font-weight:500">SYNC ENGINE</span></h2>
+      ${[['Key Insight','Revenue meleset Rp 2.220 Bn dari target. PJM penyumbang gap terbesar (deviasi -8,7%), disusul PHC dan PSL.'],
+         ['Root Cause (Predicted)','82% gap PJM berasal dari penurunan volume & tarif layanan Pemanduan, terkonsentrasi di Regional 2.'],
+         ['Proyeksi','Tanpa intervensi, deviasi Q3 diproyeksikan melebar ke ± Rp 2.900 Bn.'],
+         ['Rekomendasi','Intervensi tarif & kapasitas PJM dalam 30 hari; buka Deep Dive untuk ranking prioritas temuan.']].map(b=>`
+      <div style="margin-bottom:11px"><div style="color:${C.amber};font-size:10.5px;font-weight:700;margin-bottom:3px">${b[0]}</div>
+      <div style="color:#C7D4E5;font-size:12.5px;line-height:1.55">${b[1]}</div></div>`).join('')}
+      <button class="btn" style="background:${C.teal};color:#fff;width:100%" onclick="go('deepdive')">Buka Deep Dive →</button>
+    </div>
+  </div>`;
+};
+
+/* ---------- SUBSIDIARIES ---------- */
+R.subs = () => {
+  const cards = SUBS_TREE.map(s=>{
+    const saved=S().subsStatus[s.id]||{};
+    const status=saved.status||'Active';
+    const aksi=saved.aksi||'';
+    const perf=ENTITIES.find(e=>e.id===s.id);
+    return `<div class="card" style="margin:0">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+        <div><b style="font-size:13.5px">${s.nama}</b><div style="font-size:11px;color:var(--mute)" class="mono">${s.id}${s.anak?` · +${s.anak} anak`:''}</div></div>
+        <span class="pill" style="background:${status==='Active'?ST.ontrack.bg:ST.atrisk.bg};color:${status==='Active'?C.green:'#B37413'}">${status}</span>
+      </div>
+      ${aksi?`<div style="font-size:11.5px;background:#F7FAFC;border:1px dashed var(--line);border-radius:8px;padding:7px 10px;margin-top:9px"><b style="color:var(--tealD)">Aksi korporasi:</b> ${aksi}</div>`:''}
+      <div style="display:flex;gap:6px;margin-top:11px">
+        ${perf?`<button class="btn ghost sm" onclick="go('overview')">📈 Performance</button>`:''}
+        <button class="btn ghost sm" onclick="editSub('${s.id}')">✎ Status &amp; aksi</button>
+      </div></div>`;
+  }).join('');
+  return `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <span style="font-size:13px;font-weight:700">PT Pelabuhan Indonesia (Persero)</span>
+    <span class="tag">${SUBS_TREE.length} entitas ditampilkan</span>
+    <span class="spacer"></span><span class="srcnote">Status &amp; aksi korporasi = data SYNC (tersimpan)</span></div>
+  <div class="grid g3">${cards}</div>`;
+};
+function editSub(id){
+  const s=SUBS_TREE.find(x=>x.id===id); const saved=S().subsStatus[id]||{};
+  openDrawer(`
+    <span class="mono" style="font-size:11px;color:var(--mute)">${id}</span>
+    <h2 style="font-size:17px;margin:4px 0 14px;text-transform:none;letter-spacing:0">${s.nama}</h2>
+    <div style="font-size:11px;font-weight:700;color:var(--mute);margin-bottom:5px">STATUS PERUSAHAAN</div>
+    <select id="subStatus" style="width:100%">${['Active','Under Review','Proses Merger','Divestasi'].map(o=>`<option ${((saved.status||'Active')===o)?'selected':''}>${o}</option>`).join('')}</select>
+    <div style="font-size:11px;font-weight:700;color:var(--mute);margin:14px 0 5px">AKSI KORPORASI (opsional)</div>
+    <input type="text" id="subAksi" style="width:100%" placeholder="mis. Merger dengan PSL (target Sep 2026)" value="${saved.aksi||''}">
+    <button class="btn navy" style="width:100%;margin-top:16px" onclick="saveSub('${id}')">Simpan</button>
+    <div class="note">Tersimpan di database SYNC (Jenis 2) — konsisten antar-sesi.</div>`);
+}
+function saveSub(id){
+  S().subsStatus[id]={status:$('subStatus').value, aksi:$('subAksi').value.trim()};
+  store.save(); closeDrawer(); flash(`Status ${id} tersimpan.`); render();
+}
+
+/* ---------- EXCEPTION CENTER (dikembangkan) ---------- */
+let exFilter={imp:'all',st:'all'};
+R.exception = () => {
+  const rows=EXCEPTIONS.filter(x=>(exFilter.imp==='all'||x.impact===exFilter.imp)&&(exFilter.st==='all'||exStatus(x.id)===exFilter.st));
+  const cnt=s=>EXCEPTIONS.filter(x=>exStatus(x.id)===s).length;
+  return `
+  <div class="grid g4">
+    ${[['Baru',cnt('new'),C.red],['Ditinjau',cnt('reviewed'),C.tealD],['Jadi Action',cnt('assigned'),C.green],['Diabaikan',cnt('dismissed'),C.mute]].map(x=>`
+    <div class="kcard" style="border-left:4px solid ${x[2]}"><div style="font-size:26px;font-weight:800;color:${x[2]}">${x[1]}</div><div style="font-size:11.5px;color:var(--mute)">${x[0]}</div></div>`).join('')}
+  </div>
+  <div class="controls" style="margin-top:14px">
+    <div class="seg">${['all','High','Medium'].map(p=>`<button class="${exFilter.imp===p?'on':''}" onclick="exFilter.imp='${p}';render()">${p==='all'?'Semua impact':p}</button>`).join('')}</div>
+    <select onchange="exFilter.st=this.value;render()"><option value="all">Semua status</option>
+      ${Object.entries(EXST).map(([k,v])=>`<option value="${k}" ${exFilter.st===k?'selected':''}>${v[0]}</option>`).join('')}</select>
+    <span class="spacer"></span><span style="font-size:12px;color:var(--mute)">Hanya isu di atas threshold yang muncul di sini</span>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    ${rows.length? rows.map(x=>`
+    <div class="click" onclick="openEx('${x.id}')" style="display:flex;align-items:center;gap:13px;padding:14px 16px;border-bottom:1px solid var(--lineL);cursor:pointer">
+      ${sdot(x.s)}
+      <div style="flex:1;min-width:0"><b style="font-size:13.5px">${x.t}</b>
+        <div style="font-size:11.5px;color:var(--mute)">${x.e} · <span class="mono">${x.metric}</span> · threshold: ${x.threshold}</div></div>
+      <span class="pill" style="background:${x.impact==='High'?ST.offtrack.bg:ST.atrisk.bg};color:${x.impact==='High'?C.red:'#B37413'}">${x.impact}</span>
+      ${exChip(x.id)}
+    </div>`).join(''):'<div class="empty">Tidak ada exception dengan filter ini.</div>'}
+  </div>`;
+};
+function openEx(id){
+  const x=EXCEPTIONS.find(e=>e.id===id); const st=exStatus(id);
+  const relActions=S().actions.filter(a=>a.from===id);
+  openDrawer(`
+    <div style="display:flex;gap:8px;align-items:center"><span class="mono" style="font-size:11px;color:var(--mute)">${x.id}</span>${exChip(id)}</div>
+    <h2 style="font-size:17px;margin:6px 0 2px;text-transform:none;letter-spacing:0">${x.t}</h2>
+    <div style="font-size:12px;color:var(--mute)">${x.e} · terdeteksi otomatis (${x.threshold})</div>
+    <div style="display:flex;gap:20px;margin:14px 0;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)">
+      <div><div style="font-size:10px;color:var(--mute)">DEVIASI</div><div class="mono" style="font-weight:800;color:${C.red};font-size:16px">${x.metric}</div></div>
+      <div><div style="font-size:10px;color:var(--mute)">IMPACT</div><div style="font-weight:800;font-size:16px">${x.impact}</div></div>
+    </div>
+    <div style="margin-bottom:12px"><div style="color:${C.amber};font-size:11px;font-weight:700;margin-bottom:3px">🔎 ROOT CAUSE (AI)</div>
+      <div style="font-size:12.5px;line-height:1.55;color:#334155">${x.root}</div></div>
+    <div style="margin-bottom:16px"><div style="color:${C.teal};font-size:11px;font-weight:700;margin-bottom:3px">✦ REKOMENDASI</div>
+      <div style="font-size:12.5px;line-height:1.55;color:#334155">${x.rec}</div></div>
+    ${relActions.length?`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;color:var(--mute);margin-bottom:6px">ACTION TERKAIT</div>
+      ${relActions.map(a=>`<div style="font-size:12px;padding:7px 10px;background:#F7FAFC;border-radius:8px;margin-bottom:5px;display:flex;justify-content:space-between;gap:8px"><span class="mono">${a.id}</span><span style="flex:1">${a.t}</span>${actionStatusChip(a)}</div>`).join('')}</div>`:''}
+    <div style="display:grid;gap:8px">
+      ${st!=='assigned'?`<button class="btn navy" onclick="exToAction('${id}')">Jadikan action &amp; tugaskan →</button>`:''}
+      ${st==='new'?`<button class="btn ghost" onclick="exDecide('${id}','reviewed')">Tandai sudah ditinjau</button>`:''}
+      ${st!=='dismissed'&&st!=='assigned'?`<button class="btn ghost" style="color:${C.red}" onclick="exDecide('${id}','dismissed')">Abaikan (bukan isu)</button>`:''}
+      ${id==='EX-104'?`<button class="btn ghost" onclick="go('deepdive')">Bedah di Deep Dive 🔎</button>`:''}
+    </div>
+    <div class="note">Keputusan atas exception adalah data SYNC (Jenis 2) — tersimpan.</div>`);
+}
+function exDecide(id,status){
+  S().exDecisions[id]={status}; store.save(); closeDrawer(); render();
+  flash(`${id} ditandai "${EXST[status][0]}".`);
+}
+function exToAction(id){
+  const x=EXCEPTIONS.find(e=>e.id===id);
+  const st=S(); st.seq++;
+  const na={id:'ACT-0'+st.seq, t:'Tindak lanjut: '+x.t+' — '+x.e, from:id, e:x.e, pic:'', due:'', st:'open'};
+  st.actions.unshift(na); st.exDecisions[id]={status:'assigned'}; store.save();
+  closeDrawer(); go('action'); flash(`${id} → ${na.id} dibuat. Tetapkan PIC & deadline.`);
+  setTimeout(()=>editAction(na.id),300);
+}
+
+/* ---------- DEEP DIVE (ringkas, terintegrasi) ---------- */
+R.deepdive = () => {
+  const maxS=Math.max(...DD.svc.map(s=>Math.abs(s.dev)));
+  const maxR=Math.max(...DD.reg.map(r=>Math.abs(r.dev)));
+  const ranked=DD.findings.map(f=>({...f,score:+((f.d*f.u)/f.ef).toFixed(1)})).sort((a,b)=>b.score-a.score);
+  const rc=[C.red,C.amber,C.teal,'#9AB0C7'];
+  return `
+  <div class="card" style="background:var(--navy);border-color:var(--navy3)">
+    <div style="display:flex;gap:0;flex-wrap:wrap">
+      ${[['1 · EXCEPTION','EX-104 · Pendapatan PJM','-8,7% vs target'],['2 · LAYANAN','Pemanduan','-62% dari deviasi'],['3 · WILAYAH','Regional 2','-14,2% deviasi'],['4 · PRIORITAS',ranked[0].t.split(' ').slice(0,3).join(' ')+'…','skor '+ranked[0].score],['5 · KONSEP',ranked.length+' konsep siap','kirim ke Action Tracker']].map((s,i)=>`
+      <div style="flex:1;min-width:150px;padding:4px 16px 4px 8px;${i>0?'border-left:1px dashed #2A4468;padding-left:16px':''}">
+        <div style="font-size:9px;letter-spacing:1px;color:${C.amber};font-weight:700">${s[0]}</div>
+        <div style="font-size:13px;font-weight:700;color:#fff;margin-top:2px">${s[1]}</div>
+        <div style="font-size:10.5px;color:#6FD3D8">${s[2]}</div></div>`).join('')}
+    </div>
+  </div>
+  <div class="grid g2">
+    <div class="card" style="margin:0"><h2>Layanan penyumbang deviasi (PJM)</h2>
+      ${DD.svc.map((s,i)=>`<div style="display:grid;grid-template-columns:110px 1fr 110px;gap:10px;align-items:center;padding:6px 0">
+        <b style="font-size:12.5px">${s.n}</b><div class="barbg"><div style="width:${Math.abs(s.dev)/maxS*100}%;background:${i===0?C.red:i===1?C.amber:'#9AB0C7'}"></div></div>
+        <span class="tr mono" style="font-weight:700;color:${i===0?C.red:'var(--ink)'};font-size:12px">${s.dev}% <span style="color:var(--mute);font-weight:500;font-size:10px">${s.abs}</span></span></div>`).join('')}
+      <div style="margin-top:8px"><span class="srcnote">🗄️ Sistem Operasional Direktorat (simulasi)</span></div></div>
+    <div class="card" style="margin:0"><h2>Deviasi Pemanduan per wilayah</h2>
+      ${DD.reg.map(r=>{const col=r.dev<=-10?C.red:r.dev<0?C.amber:C.green;return `<div style="display:grid;grid-template-columns:110px 1fr 70px;gap:10px;align-items:center;padding:6px 0">
+        <b style="font-size:12.5px">${r.n}</b><div class="barbg"><div style="width:${Math.abs(r.dev)/maxR*100}%;background:${col}"></div></div>
+        <span class="tr mono" style="font-weight:700;color:${col};font-size:12px">${r.dev>0?'+':''}${r.dev}%</span></div>`;}).join('')}
+      <div style="font-size:11.5px;color:var(--mute);margin-top:8px">Regional 2: waiting time pandu 4,8 jam (target 2,0) · pandu aktif 18/26 · motor pandu 5/8. Regional 4 di atas target — benchmark internal.</div></div>
+  </div>
+  <div class="card"><h2>Ranking prioritas &amp; konsep penyelesaian</h2>
+    <table><tr><th style="width:40px">Rank</th><th>Temuan</th><th class="tc">D×U÷E</th><th class="tc">Skor</th><th>Usulan PIC</th><th></th></tr>
+    ${ranked.map((f,i)=>{
+      const done=S().actions.some(a=>a.t.includes(f.t.slice(0,20)));
+      return `<tr><td><span style="display:inline-flex;width:24px;height:24px;border-radius:7px;background:${rc[i]};color:#fff;font-weight:800;font-size:12px;align-items:center;justify-content:center">${i+1}</span></td>
+      <td><b style="font-size:12.5px">${f.t}</b><div style="font-size:10.5px;color:var(--mute)"><span class="tag" style="padding:1px 7px;font-size:9.5px;${f.hor==='Quick win'?'background:'+ST.ontrack.bg+';color:'+C.green:''}">${f.hor}</span></div></td>
+      <td class="tc mono" style="font-size:11px;color:var(--mute)">${f.d}×${f.u}÷${f.ef}</td>
+      <td class="tc mono" style="font-weight:800;color:${rc[i]}">${f.score}</td>
+      <td style="font-size:11.5px">${f.pic}</td>
+      <td class="tr">${done?'<span class="pill" style="background:'+ST.ontrack.bg+';color:'+C.green+'">✓ Terkirim</span>':`<button class="btn navy sm" onclick="ddToAction(${i})">Kirim ke Tracker →</button>`}</td></tr>`;
+    }).join('')}</table>
+    <div style="font-size:11px;color:var(--mute);margin-top:8px">Skor = (Dampak × Urgensi) ÷ Effort, skala 1–5. Konsep &amp; penugasan = data SYNC (tersimpan).</div>
+  </div>`;
+};
+function ddToAction(i){
+  const ranked=DD.findings.map(f=>({...f,score:+((f.d*f.u)/f.ef).toFixed(1)})).sort((a,b)=>b.score-a.score);
+  const f=ranked[i]; const st=S(); st.seq++;
+  st.actions.unshift({id:'ACT-0'+st.seq,t:f.t+' (PJM)',from:'EX-104',e:'PJM',pic:f.pic,due:'',st:'open'});
+  st.exDecisions['EX-104']={status:'assigned'}; store.save(); render();
+  flash(`Temuan prioritas ${i+1} dikirim ke Action Tracker.`);
+}
+
+/* ---------- ACTION TRACKER (dikembangkan) ---------- */
+let actFilter={st:'all',e:'all',q:''};
+R.action = () => {
+  const acts=S().actions;
+  const rows=acts.filter(a=>{
+    const stMatch = actFilter.st==='all' || (actFilter.st==='overdue'? isOverdue(a) : a.st===actFilter.st && !(actFilter.st!=='done'&&false));
+    const eMatch = actFilter.e==='all'||a.e===actFilter.e;
+    const qMatch = !actFilter.q || (a.t+' '+a.id+' '+a.pic).toLowerCase().includes(actFilter.q.toLowerCase());
+    return stMatch&&eMatch&&qMatch;
+  });
+  const done=acts.filter(a=>a.st==='done').length;
+  const rate=pct(done,acts.length);
+  const ents=[...new Set(acts.map(a=>a.e))];
+  return `
+  <div class="grid g4">
+    ${[['Open',acts.filter(a=>a.st==='open'&&!isOverdue(a)).length,C.mute],['In Progress',acts.filter(a=>a.st==='progress').length,C.teal],['Overdue',acts.filter(isOverdue).length,C.red],['Completed',done,C.green]].map(x=>`
+    <div class="kcard" style="border-left:4px solid ${x[2]}"><div style="font-size:26px;font-weight:800;color:${x[2]}">${x[1]}</div><div style="font-size:11.5px;color:var(--mute)">${x[0]}</div></div>`).join('')}
+  </div>
+  <div class="card" style="margin-top:14px"><h2>Tingkat penyelesaian <span class="lk" onclick="go('loop')">Improvement Loop ›</span></h2>
+    <div style="display:flex;align-items:center;gap:12px"><div class="barbg" style="flex:1;height:10px"><div style="width:${rate}%;background:linear-gradient(90deg,var(--teal),#00D4C8)"></div></div>
+    <b class="mono" style="font-size:14px">${rate}%</b></div>
+    <div style="font-size:11.5px;color:var(--mute);margin-top:5px">${done} dari ${acts.length} action selesai. Target BPR: &gt;90% on time.</div></div>
+  <div class="controls">
+    <div class="seg">${[['all','Semua'],['open','Open'],['progress','Progress'],['overdue','Overdue'],['done','Done']].map(([v,l])=>`<button class="${actFilter.st===v?'on':''}" onclick="actFilter.st='${v}';render()">${l}</button>`).join('')}</div>
+    <select onchange="actFilter.e=this.value;render()"><option value="all">Semua entitas</option>${ents.map(e=>`<option ${actFilter.e===e?'selected':''}>${e}</option>`).join('')}</select>
+    <input type="text" placeholder="Cari action / PIC…" value="${actFilter.q}" oninput="actFilter.q=this.value;render()" style="min-width:170px">
+    <span class="spacer"></span><span style="font-size:12px;color:var(--mute)">${rows.length} action</span>
+  </div>
+  <div class="card" style="padding:0;overflow:hidden">
+    <table><tr><th>ID / Sumber</th><th>Tindakan</th><th>PIC</th><th>Deadline</th><th>Status</th><th></th></tr>
+    ${rows.length? rows.map(a=>`
+    <tr class="${isOverdue(a)?'':''}" style="${isOverdue(a)?'background:#FFF8F8':''}">
+      <td><span class="mono" style="font-weight:700;font-size:11.5px">${a.id}</span><div class="mono" style="font-size:10px;color:var(--mute)">← ${a.from||'manual'}</div></td>
+      <td style="font-weight:500">${a.t}</td>
+      <td style="font-size:12px;color:${a.pic?'#334155':C.amber};font-weight:${a.pic?'400':'700'}">${a.pic||'⚠ belum ditugaskan'}</td>
+      <td class="mono" style="font-size:11.5px;color:${isOverdue(a)?C.red:'var(--mute)'};font-weight:${isOverdue(a)?'700':'400'}">${a.due||'—'}</td>
+      <td>${actionStatusChip(a)}</td>
+      <td class="tr" style="white-space:nowrap">
+        <button class="btn ghost sm" onclick="editAction('${a.id}')">✎</button>
+        ${a.st!=='done'?`<button class="btn ghost sm" style="color:var(--teal)" title="Majukan status" onclick="advAction('${a.id}')">→</button>`:''}
+      </td></tr>`).join(''):'<tr><td colspan="6"><div class="empty">Tidak ada action dengan filter ini.</div></td></tr>'}
+    </table>
+  </div>
+  <div class="note">Action = data SYNC (Jenis 2), tersimpan di perangkat ini. Klik ✎ untuk atur PIC &amp; deadline, → untuk majukan status.</div>`;
+};
+function advAction(id){
+  const a=S().actions.find(x=>x.id===id); if(!a)return;
+  a.st = a.st==='open'?'progress':'done'; store.save(); render();
+  if(a.st==='done') flash(`${id} selesai — Improvement Loop bertambah.`);
+}
+function editAction(id){
+  const a=S().actions.find(x=>x.id===id); if(!a)return;
+  openDrawer(`
+    <span class="mono" style="font-size:11px;color:var(--mute)">${a.id} ← ${a.from||'manual'}</span>
+    <h2 style="font-size:16px;margin:4px 0 14px;text-transform:none;letter-spacing:0">${a.t}</h2>
+    <div style="font-size:11px;font-weight:700;color:var(--mute);margin-bottom:5px">PIC (penanggung jawab)</div>
+    <input type="text" id="aPic" style="width:100%" placeholder="mis. Ops Dir. — Reza" value="${a.pic||''}">
+    <div style="font-size:11px;font-weight:700;color:var(--mute);margin:14px 0 5px">DEADLINE</div>
+    <input type="text" id="aDue" style="width:100%" placeholder="YYYY-MM-DD" value="${a.due||''}">
+    <div style="font-size:11px;font-weight:700;color:var(--mute);margin:14px 0 5px">STATUS</div>
+    <select id="aSt" style="width:100%">${[['open','Open'],['progress','In Progress'],['done','Completed']].map(([v,l])=>`<option value="${v}" ${a.st===v?'selected':''}>${l}</option>`).join('')}</select>
+    <button class="btn navy" style="width:100%;margin-top:16px" onclick="saveAction('${a.id}')">Simpan</button>
+    <div class="note">Hari "sekarang" untuk demo: ${TODAY}. Deadline lewat = otomatis Overdue.</div>`);
+}
+function saveAction(id){
+  const a=S().actions.find(x=>x.id===id);
+  a.pic=$('aPic').value.trim(); a.due=$('aDue').value.trim(); a.st=$('aSt').value;
+  store.save(); closeDrawer(); render(); flash(`${id} diperbarui.`);
+}
+
+/* ---------- IMPROVEMENT LOOP ---------- */
+R.loop = () => {
+  const acts=S().actions, done=acts.filter(a=>a.st==='done').length, rate=pct(done,acts.length);
+  const steps=[['Data','Integrasi otomatis dari dashboard Keuangan, Komersial, Operasional.'],['Insight','AI hasilkan analisis kinerja, deviasi, dan root cause.'],['Action','Keputusan BPR jadi task dengan PIC & deadline.'],['Outcome','Eksekusi dimonitor sampai tuntas & dampaknya diukur.'],['Feedback','Hasil aksi memperkaya data & menyesuaikan KPI berikutnya.']];
+  return `
+  <div class="card" style="background:linear-gradient(160deg,var(--navy),var(--navy2));border-color:var(--navy3)">
+    <div style="color:#fff;font-weight:800;font-size:16px">Closed-Loop Performance Management</div>
+    <div style="color:#AEBED2;font-size:12.5px;margin-top:4px;max-width:560px">Setiap keputusan yang dieksekusi kembali menjadi data — sistem menyesuaikan KPI secara berkelanjutan. Progress di bawah dihitung langsung dari Action Tracker.</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:16px"><div class="barbg" style="flex:1;height:9px;background:var(--navy)"><div style="width:${rate}%;background:linear-gradient(90deg,var(--teal),#00D4C8)"></div></div>
+    <b class="mono" style="color:#fff">${rate}%</b></div>
+    <div style="color:#7E93AE;font-size:11px;margin-top:5px">${done} dari ${acts.length} action selesai.</div>
+  </div>
+  <div class="grid" style="grid-template-columns:repeat(5,1fr)">${steps.map((s,i)=>`
+    <div class="card" style="margin:0"><div class="mono" style="font-size:10px;color:var(--mute)">0${i+1}</div>
+    <b style="font-size:13.5px">${s[0]}</b><div style="font-size:11.5px;color:var(--mute);margin-top:4px;line-height:1.45">${s[1]}</div></div>`).join('')}</div>`;
+};
+
+/* ---------- REPORTS / DATA / ADMIN ---------- */
+R.reports = () => `
+  <div class="grid g2">${[['Executive BPR Deck — Q2 2025','Auto-generated · siap paparan','PPTX'],['Ringkasan Kinerja Keuangan','Konsolidasi seluruh entitas','PDF'],['Laporan Exception & Tindak Lanjut','Periode Jun 2025 · dari data live','PDF'],['Export Action Tracker','Semua action + status','XLSX']].map(r=>`
+  <div class="card" style="margin:0;display:flex;gap:12px;align-items:center"><div style="width:40px;height:40px;border-radius:10px;background:var(--tealL);display:flex;align-items:center;justify-content:center">📄</div>
+  <div style="flex:1"><b style="font-size:13px">${r[0]}</b><div style="font-size:11.5px;color:var(--mute)">${r[1]}</div></div>
+  <span class="tag mono">${r[2]}</span></div>`).join('')}</div>
+  <div class="note">Laporan otomatis menggantikan pembuatan slide manual — inti nilai SYNC.</div>`;
+
+R.data = () => `
+  <div class="card"><h2>Status integrasi sumber (Jenis 1 — baca-saja)</h2>
+    <table><tr><th>Sumber</th><th>Records</th><th>Last Sync</th><th>Status</th></tr>
+    ${[['Sistem Keuangan (ERP)','1,2 Jt','09:30',1],['Sistem Komersial','480 Rb','09:30',1],['Sistem Operasional (TOS)','2,4 Jt','09:12',1],['Data SDM & Organisasi','18 Rb','08:40',0]].map(d=>`
+    <tr><td style="font-weight:600">🗄 ${d[0]}</td><td class="mono" style="color:var(--mute)">${d[1]}</td><td class="mono" style="color:var(--mute)">${d[2]}</td>
+    <td>${d[3]?`<span class="pill" style="background:${ST.ontrack.bg};color:${C.green}">Tersambung</span>`:`<span class="pill" style="background:${ST.atrisk.bg};color:#B37413">Perlu cek</span>`}</td></tr>`).join('')}</table>
+  </div>
+  <div class="card"><h2>Data aplikasi SYNC (Jenis 2 — tersimpan di perangkat)</h2>
+    <div style="font-size:12.5px;color:#334155;line-height:1.6">Action items, keputusan exception, dan status/aksi korporasi tersimpan otomatis di browser ini (localStorage) dan bertahan saat halaman ditutup. Pada tahap produksi, penyimpanan ini digantikan database cloud (Supabase) agar konsisten antar-pengguna.</div>
+    <button class="btn ghost" style="margin-top:12px;color:${C.red}" onclick="if(confirm('Kembalikan semua data SYNC ke kondisi awal demo?')){store.reset();render();flash('Data SYNC direset ke kondisi awal.')}">↺ Reset data demo</button>
+  </div>`;
+
+R.admin = () => `
+  <div class="card"><h2>Role-based access &amp; decision rights</h2>
+    ${[['Holding — Direksi','Full access · semua entitas',8],['Group MPAP (Panitia BPR)','Kelola KPI, exception, action',12],['Subholding — Direksi','Akses entitas & anak sendiri',24],['Anak Perusahaan','Input & lihat data sendiri',55]].map(r=>`
+    <div style="display:flex;gap:12px;align-items:center;padding:11px 0;border-bottom:1px solid var(--lineL)">⚙
+    <div style="flex:1"><b style="font-size:13px">${r[0]}</b><div style="font-size:11.5px;color:var(--mute)">${r[1]}</div></div>
+    <span class="mono" style="font-size:11.5px;color:var(--mute)">${r[2]} user</span></div>`).join('')}
+  </div>
+  <div class="card" style="font-size:12px;color:var(--mute)">Decision rights control mengatur batas kewenangan (capex, pricing, kontrak) antara holding &amp; subholding — menjaga alignment strategi dan kepatuhan.</div>`;
+
+/* ============ drawer ============ */
+function openDrawer(html){ $('drawer').innerHTML=`<button class="x" onclick="closeDrawer()">×</button>`+html; $('drawer').classList.add('on'); $('overlay').classList.add('on'); }
+function closeDrawer(){ $('drawer').classList.remove('on'); $('overlay').classList.remove('on'); }
+
+render();
+</script>
+</body>
+</html>
